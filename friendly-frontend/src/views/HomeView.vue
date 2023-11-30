@@ -37,7 +37,7 @@
                       : chatItemStyle.received
                   "
                 >
-                  <p class="text-left py-2">
+                  <p id="message" class="text-left py-2">
                     {{ message.message }}
                   </p>
                 </v-list-item>
@@ -88,32 +88,7 @@ export default {
         }
       },
 
-      messageList: [
-        // {
-        //   id: 1,
-        //   message: "hello",
-        //   senderId: "6564cc3cf36a18d77a3626e2",
-        //   date: "",
-        // },
-        // {
-        //   id: 2,
-        //   message: "hiii",
-        //   senderId: "",
-        //   date: "",
-        // },
-        // {
-        //   id: 3,
-        //   message: "how are you?",
-        //   senderId: "6564cc3cf36a18d77a3626e2",
-        //   date: "",
-        // },
-        // {
-        //   id: 4,
-        //   message: "i'm good",
-        //   senderId: "6564cc3cf36a18d77a3622",
-        //   date: "",
-        // },
-      ],
+      messageList: [],
       currentUser: JSON.parse(localStorage.getItem("userData")),
       chatUpperDiv: {
         sent: "message-wrapper d-flex flex-row-reverse",
@@ -166,6 +141,8 @@ export default {
     },
     appendChat(incomingMessage){
       this.messageList = [...this.messageList, incomingMessage];
+      const container = this.$el.querySelector(".messages-container");
+      container.scrollTop = container.scrollHeight;
     }
   },
   beforeMount() {
@@ -184,7 +161,7 @@ export default {
 
     socket.on("pushMessage", (data) => {
       const incomingMessage = {
-        id: '5',
+        id: '',
         senderId: data.senderId,
         message: data.message,
         date: Date.now(),
