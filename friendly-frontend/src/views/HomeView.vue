@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card v-if="currentUser">
     <v-layout class="layout">
       <RightNav :currentUser="currentUser" @setCurrentConversation="setCurrentConversation"/>
       <v-main class="main" style="height: 100vh">
@@ -13,28 +13,28 @@
             </v-avatar>
             <h1 class="pl-5 pt-1">{{currentConversation.chattingWith.username}}</h1>
           </div>
-          <v-list class="messages-container px-2 py-1">
+          <v-list ref="messagesContainer" class="messages-container px-2 py-1">
             <div
-              v-for="message in messageList"
+              v-for="message in state.messages"
               :key="message.id"
               :class="
                 message.senderId == currentUser._id
-                  ? chatUpperDiv.sent
-                  : chatUpperDiv.received
+                  ? divStyles.chatUpperDiv.sent
+                  : divStyles.chatUpperDiv.received
               "
             >
               <div
                 :class="
                   message.senderId == currentUser._id
-                    ? chatInnerDiv.sent
-                    : chatInnerDiv.received
+                    ? divStyles.chatInnerDiv.sent
+                    : divStyles.chatInnerDiv.received
                 "
               >
                 <v-list-item
                   :class="
                     message.senderId == currentUser._id
-                      ? chatItemStyle.sent
-                      : chatItemStyle.received
+                      ? divStyles.chatItemStyle.sent
+                      : divStyles.chatItemStyle.received
                   "
                 >
                   <p id="message" class="text-left py-2">
@@ -64,112 +64,100 @@
     </v-layout>
   </v-card>
 </template>
-<script>
-import RightNav from "../components/RightNav.vue";
-import LeftNav from "../components/LeftNav.vue";
-import { isLoggedIn } from "../lib/helperMethods";
-import { socket, state } from "@/socket";
 
-export default {
-  name: "HomeView",
-  components: {
-    LeftNav,
-    RightNav,
-  },
-  data() {
-    return {
-      textValue: "",
-      currentConversation: {
-        members: [],
-        id: '',
-        chattingWith:{
-          username: '',
-          profilePicture: ''
-        }
-      },
+<script setup>
+  import RightNav from "../components/RightNav.vue";
+  import { useRouter } from 'vue-router'
+  import { isLoggedIn } from "../lib/helperMethods";
+  import { socket, state } from "@/socket";
+  import { ref, reactive, onBeforeMount, onMounted, computed} from "vue"
 
-      messageList: [],
-      currentUser: JSON.parse(localStorage.getItem("userData")),
-      chatUpperDiv: {
-        sent: "message-wrapper d-flex flex-row-reverse",
-        received: "message-wrapper d-flex",
-      },
-      chatInnerDiv: {
-        sent: "message-content-wrapper d-flex flex-row-reverse",
-        received: "message-content-wrapper",
-      },
-      chatItemStyle: {
-        sent: "rounded-xl rounded-be-0 bg-blue",
-        received: "rounded-xl rounded-ts-0 bg-purple",
-      },
-      socket: null,
-      userAccounts: this.getUserAcounts(),
-      // incomingMessage: '',
-      // chattingWith: {
-      //   username:'',
-      //   profilePicture: ''
-      // }
-    };
-  },
-  methods: {
-    setCurrentConversation(receipientId, receipientUsername, profilePicture) {
-      this.currentConversation.members = [receipientId, this.currentUser._id];
-      this.currentConversation.chattingWith.username =  receipientUsername
-      this.currentConversation.chattingWith.profilePicture =  profilePicture
+  const router = useRouter()
+
+  onBeforeMount(() => {
+    if (!isLoggedIn()) {
+      router.push({ name: "login" });
+    }
+  })
+
+  onMounted(() => {
+    if (currentUser){
+      socket.connect();
+      socket.emit("setOnline", currentUser._id);
+      // socket.on("getOnlineUsers", (...onlineUsers) => {
+      //   userAccounts.filter((users) =>
+      //     onlineUsers.some((onlineUser) => onlineUser.userId === users)
+      //     );
+      //   })
+    }
+  
+  })
+
+  const currentUser = JSON.parse(localStorage.getItem("userData"))
+  const messagesContainer = ref(null)
+  const messages = computed(() => state.messages)
+  let textValue =  ""
+
+  const currentConversation = reactive({
+    members: [],
+    id: '',
+    chattingWith:{
+      username: '',
+      profilePicture: ''
+    }
+  })
+
+  const divStyles = {
+    chatUpperDiv: {
+      sent: "message-wrapper d-flex flex-row-reverse",
+      received: "message-wrapper d-flex",
     },
-    getUserAcounts() {
+    chatInnerDiv: {
+      sent: "message-content-wrapper d-flex flex-row-reverse",
+      received: "message-content-wrapper",
+    },
+    chatItemStyle: {
+      sent: "rounded-xl rounded-be-0 bg-blue",
+      received: "rounded-xl rounded-ts-0 bg-purple",
+    }
+  }
+
+  const setCurrentConversation = (receipientId, receipientUsername, profilePicture) => {
+    currentConversation.members = [receipientId, currentUser._id];
+    currentConversation.chattingWith.username =  receipientUsername
+    currentConversation.chattingWith.profilePicture =  profilePicture
+  }
+
+  const getUserAcounts = () => {
       return [];
-    },
-    sendText() {
-      const message = {
-        senderId: this.currentUser._id,
-        message: this.textValue,
-        conversationId: this.currentConversation.id,
-      };
+  }
 
-      const receiverId = this.currentConversation.members.find(
-        (member) => member !== this.currentUser._id
+  const sendText = () => {
+      const message = {
+        senderId: currentUser._id,
+        message: textValue,
+        conversationId: currentConversation.id,
+      };
+      const receiverId = currentConversation.members.find(
+        (member) => member !== currentUser._id
       );
 
       socket.emit("sendMessage", {
-        senderId: this.currentUser._id,
+        senderId: currentUser._id,
         receiverId,
-        message: this.textValue,
+        message: textValue,
       });
-      this.appendChat(message)
-      this.textValue = "";
-    },
-    appendChat(incomingMessage){
-      this.messageList = [...this.messageList, incomingMessage];
-      const container = this.$el.querySelector(".messages-container");
-      container.scrollTop = container.scrollHeight;
-    }
-  },
-  beforeMount() {
-    if (!isLoggedIn()) {
-      this.$router.push({ name: "login" });
-    }
-  },
-  mounted() {
-    socket.connect();
-    socket.emit("setOnline", this.currentUser._id);
-    socket.on("getOnlineUsers", (...onlineUsers) => {
-      this.userAccounts.filter((users) =>
-        onlineUsers.some((onlineUser) => onlineUser.userId === users)
-      );
-    });
-
-    socket.on("pushMessage", (data) => {
-      const incomingMessage = {
-        id: '',
-        senderId: data.senderId,
-        message: data.message,
-        date: Date.now(),
-      };
-      this.appendChat(incomingMessage)
-    });
-  },
-};
+      appendChat(message)
+      textValue = "";
+  }
+  
+  const appendChat = (incomingMessage) => {
+      state.appendMessage(incomingMessage)
+      const container = messagesContainer.value
+      if (container){
+        container.scrollTop = container.scrollHeight;
+      }
+  }
 </script>
 
 <style>

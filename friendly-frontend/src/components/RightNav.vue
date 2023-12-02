@@ -15,14 +15,14 @@
             >
             </v-list-item>
             <span>
-            <v-btn prepend-icon="mdi-logout">Logout</v-btn>
+            <v-btn @click="logout" prepend-icon="mdi-logout">Logout</v-btn>
             </span>
         </template>
         <v-divider></v-divider>
         <v-list-item class="mt-10" prepend-icon="mdi-account-group-outline" title="Users" value="users"></v-list-item>
         <div class="users">
             <v-list-item v-for="user in userAccounts" :key="user.id" 
-            @click="convoSelect(user._id, user.username)"
+            @click="selectConvo(user._id, user.username)"
             class="user-info mt-2"
             :prepend-avatar="user.profilePicture ? user.profilePicture : 'noProfile.jpg'"
             :title="user.username"
@@ -32,47 +32,55 @@
     
     </v-navigation-drawer>
 </template>
-<script>
+<script setup>
 import * as utils from "../lib/helperMethods"
-export default 
-{
-    props:["currentUser"],
-    data() {
-        return{
-            conversations: [],
-            userAccounts: []
-        }
-    },
-    methods:{
-        convoSelect(id, username){
-            this.$emit('setCurrentConversation', id, username)
-        },
-        async getConversations(){
-            try {
-                const res = await utils.getRequest(`${process.env.VUE_APP_API_BASE_URL}/api/conversations/${this.currentUser._id}`);
-                this.conversations = res.data
-            } catch (err) {
-                console.log(err);
-            }
-        },
-            async getUsers(){
-            try {
-                const res = await utils.getRequest(`${process.env.VUE_APP_API_BASE_URL}/api/users/`);
-                res.data.some((d) => {
-                    d.username !== this.currentUser.username && this.userAccounts.push(d)
-                    })
-            } catch (err) {
-                console.log(err);
-            }
-        }   
-    },
-    mounted(){
-        this.getConversations()
-        this.getUsers()
+import {reactive, defineProps, defineEmits,onMounted} from "vue"
 
+   onMounted(() =>{
+        getUsers()   
+   })
+    
+    const props = defineProps(["currentUser"])
+    const emits = defineEmits(["selectConvo"])
+
+    const conversations =  reactive([])
+    const userAccounts = reactive([])
+
+    const logout = () =>{
+        localStorage.removeItem("userData")
+        this.$router.push({name: 'login'})
+    }  
+    
+    const selectConvo = (id, username) =>{
+        emits('setCurrentConversation', id, username)
     }
-}
+
+    const getConversations = () => {
+        try {
+            utils.getRequest(`${process.env.VUE_APP_API_BASE_URL}/api/conversations/${currentUser._id}`)
+            .then((data)=>{
+                this.conversations = res.data
+            })
+        } catch (err) {
+            console.log(err);
+        }
+    }
+    
+    const getUsers = () => {
+        try {
+            utils.getRequest(`${process.env.VUE_APP_API_BASE_URL}/api/users/`)
+            .then((res)=>{
+                res.data.some((d) => {
+                d.username !== props.currentUser.username && userAccounts.push(d)
+                })
+            })
+            
+        } catch (err) {
+            console.log(err);
+        }
+    }   
 </script>
+
 <style>
 .users{
     width: 100%;

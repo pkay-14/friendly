@@ -73,7 +73,6 @@ export default {
         rules: {
           required: value => !!value || 'Field is required'
         }
-      // value => (value && value.length >= 3) || 'Min 3 characters',
   }
   },
   methods: {

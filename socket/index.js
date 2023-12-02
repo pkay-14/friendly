@@ -22,16 +22,17 @@ io.on("connection", (socket) => {
     
     socket.on("setOnline", (userId) => {
         addOnlineUser(userId, socket.id);
-        console.log(onlineUsers)
         io.emit("getOnlineUsers", onlineUsers);
       });
 
     socket.on("sendMessage", ({ senderId, receiverId, message }) => {
         const user = getOnlineUser(receiverId);
-        io.to(user.socketId).emit("pushMessage", {
+        if (user){
+          io.to(user.socketId).emit("pushMessage", {
             senderId,
             message,
         });
+        }
     })
 
     socket.on("disconnect", () => {
