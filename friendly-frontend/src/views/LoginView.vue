@@ -15,14 +15,14 @@
             @submit.prevent="login"
           >
             <v-text-field
-              v-model="email"
+              v-model="formData.email"
               :rules="[rules.required]"
               class="mb-2"
               label="Email"
             ></v-text-field>
 
             <v-text-field
-              v-model="password"
+              v-model="formData.password"
               :rules="[rules.required]"
               label="Password"
               type="password"
@@ -57,39 +57,50 @@
 </v-app>  
 </template>
 
-<script>
-import * as utils from "../lib/helperMethods"
-export default {
-  mounted(){
+<script setup>
+  import * as utils from "../lib/helperMethods"
+  import {useRouter} from "vue-router"
+  import {reactive, onMounted} from "vue"
+  import { useToast } from 'vue-toastification';
+
+  const router = useRouter()
+  const toast = useToast();
+    
+  onMounted(()=>{
     if(utils.isLoggedIn() ){
-      this.$router.push({name: 'home'})
+      router.push({name: 'home'})
     }
-  },
-  data(){
-    return{
+  })
+
+    const formData = reactive({
       email: '',
-      password: '',
-      userData: {},
-        rules: {
-          required: value => !!value || 'Field is required'
-        }
-  }
-  },
-  methods: {
-     async login() {
-      try {
-         const res = await utils.postRequest(`${process.env.VUE_APP_API_BASE_URL}/api/auth/login`, 
-          {"email": this.email, "password": this.password})
-       localStorage.setItem("userData", JSON.stringify(res.data))
-       utils.isLoggedIn() ? this.$router.push({name: 'home'}) : alert('Unsuccessful Login')
-      } catch (error) {
-        console.log(error)
-        alert('Unsuccessful Login')
-      }
+      password: ''
+    })
+    const userData = reactive({})
+    const rules = {
+      required: value => !!value || 'Field is required'
+    }
+
+
+    const login = () => {
+    try {
+        utils.postRequest(`${process.env.VUE_APP_API_BASE_URL}/api/auth/login`, 
+        {"email": formData.email, "password": formData.password})
+        .then((res) => {
+          localStorage.setItem("userData", JSON.stringify(res.data))
+          utils.isLoggedIn() ? router.push({name: 'home'}) : toast.error('Unsuccessful Login')
+        })
+        .catch(err=>{
+          console.log(err)
+          toast.error(err.message)
+          })
+    } catch (error) {
+      console.log(error)
+      toast.error('Unsuccessful Login')
     }
   }
-}
 </script>
+
 <style scoped>
   .login{
     width: 100vw;
@@ -98,7 +109,6 @@ export default {
     justify-content: center;    
   }
   .login-wrapper{
-    /* background-color: grey; */
     width: 50vw;
     color: black;
     display: flex;

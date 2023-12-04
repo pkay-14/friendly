@@ -10,42 +10,42 @@
         <h1>FRIENDLY-CHAT</h1>
         <v-card class="register-card mx-auto px-6 py-4" max-width="344">
           <v-form
+            model-value
             v-model="form"
             ref="form"
             @submit.prevent="register"
           >
             <v-text-field
-              v-model="email"
-              :rules="[rules.required, rules.email]"
+              v-model="formData.email"
+              :rules="[formRules.required, formRules.email]"
               class="mb-2"
               label="Email"
             ></v-text-field>
 
             <v-text-field
-              v-model="username"
-              :rules="[rules.required, rules.minimum3]"
+              v-model="formData.username"
+              :rules="[formRules.required, formRules.minimum3]"
               class="mb-2"
               label="Username"
             ></v-text-field>
 
             <v-text-field
-              v-model="password"
-              :rules="[rules.required, rules.minimum6]"
+              v-model="formData.password"
+              :rules="[formRules.required, formRules.minimum6]"
               label="Password"
               type="password"
               placeholder="Set your password"
             ></v-text-field>
 
             <v-text-field
-              v-model="passwordConfirm"
-              :rules="[rules.required, rules.confirmPassword]"
+              v-model="formData.passwordConfirm"
+              :rules="[formRules.required, formRules.confirmPassword]"
               label="Confirm Password"
               type="password"
               placeholder="Enter your password again"
             ></v-text-field>
             <br>
             <v-btn
-                :disabled="!valid"
               :loading="loading"
               block
               color="success"
@@ -72,61 +72,66 @@
 </v-app>  
 </template>
 
-<script>
-import * as utils from "../lib/helperMethods"
-export default {
-  mounted(){
+<script setup>
+  import * as utils from "../lib/helperMethods"
+  import {ref, reactive, onMounted} from "vue"
+  import { useToast } from 'vue-toastification';
+  import {useRouter} from "vue-router"
+
+  const toast = useToast();
+  const router = useRouter()
+
+  onMounted(()=>{
     if(utils.isLoggedIn() ){
-      this.$router.push({name: 'home'})
+      router.push({name: 'home'})
     }
-  },
-  data(){
-    return{
-      valid: true,
-      email: null,
-      username: null,
-      password: null,
-      passwordConfirm: null,
-      userData: {},
-        rules: {
-          required: value => !!value || 'Field is required',
-          minimum3: value => (value && value.length >= 3) || 'Requires min of 3 characters',
-          minimum6: value => (value && value.length >= 6) || 'Requires min of 6 characters',
-          email: value => (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) || 'Invalid email',
-          confirmPassword: value => (value && value === this.password) || 'Passwords do not match',
-        }
-      
+  })
+
+  const form = ref(null)
+  const formData = reactive({
+    email: null,
+    username: null,
+    password: null,
+    passwordConfirm: null,
+    profilePicture: `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 50)}.jpg`
+  }) 
+  const formRules = {
+    required: value => !!value || 'Field is required',
+    minimum3: value => (value && value.length >= 3) || 'Requires min of 3 characters',
+    minimum6: value => (value && value.length >= 6) || 'Requires min of 6 characters',
+    email: value => (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) || 'Invalid email',
+    confirmPassword: value => (value && value === formData.password) || 'Passwords do not match',
   }
-  },
-  computed: {
-     passwordConfirmationRule() {
-      return () =>
-        this.password === this.confirmPassword || "Password must match";
-    }
-  },
-  methods: {
-    formValidated() {
-      if (this.$refs.form.validate()) {
-        return this.$refs.form.errors.length >= 1 ? false : true
-      }
-    },
-     async register() {
-      try {
-            if(this.formValidated()){
-              const res = await utils.postRequest(`${process.env.VUE_APP_API_BASE_URL}/api/auth/register`, 
-              {"email": this.email, "username": this.username,  "password": this.password})
-              localStorage.setItem("userData", JSON.stringify(res.data))
-              utils.isLoggedIn() ? this.$router.push({name: 'home'}) : alert('Signup failed')
-            }
-                   
-        } catch (error) {
-        console.log(error)
-        alert('Signup failed')
-      }
+  
+  const register = () => {
+    try {
+      form.value.validate()
+      .then((f)=>{
+        if(f.valid){
+          delete formData.passwordConfirm
+          utils.postRequest(
+            `${process.env.VUE_APP_API_BASE_URL}/api/auth/register`, formData
+            )
+          .then((res) =>{
+            localStorage.setItem("userData", JSON.stringify(res.data))
+            utils.isLoggedIn() ? router.push({name: 'home'}) : alert('Signup failed')
+          })
+          .catch((err)=>{
+            console.log(err)
+            toast.error(err.message)
+          })
+          }
+          else{
+            toast.info("Please check your inputs")
+          }
+      })               
+      } catch (error) {
+      console.log(error)
+      toast.error('error')
     }
   }
-}
 </script>
+
 <style scoped>
   .register{
     width: 100vw;
@@ -135,7 +140,6 @@ export default {
     justify-content: center;    
   }
   .register-wrapper{
-    /* background-color: grey; */
     width: 50vw;
     color: black;
     display: flex;

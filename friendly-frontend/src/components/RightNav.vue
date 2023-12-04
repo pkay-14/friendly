@@ -6,7 +6,11 @@
     >
         <template v-slot:prepend>
             <v-avatar size="64">
-                <v-img src="https://randomuser.me/api/portraits/women/81.jpg"></v-img>
+                <v-img 
+                :src="currentUser.profilePicture 
+                ? currentUser.profilePicture 
+                : 'noImage.png'">
+                </v-img>
             </v-avatar>
             <v-list-item
             lines="one"
@@ -22,7 +26,7 @@
         <v-list-item class="mt-10" prepend-icon="mdi-account-group-outline" title="Users" value="users"></v-list-item>
         <div class="users">
             <v-list-item v-for="user in userAccounts" :key="user.id" 
-            @click="selectConvo(user._id, user.username)"
+            @click="selectConvo(user._id, user.username, user.profilePicture)"
             class="user-info mt-2"
             :prepend-avatar="user.profilePicture ? user.profilePicture : 'noProfile.jpg'"
             :title="user.username"
@@ -35,10 +39,13 @@
 <script setup>
 import * as utils from "../lib/helperMethods"
 import {reactive, defineProps, defineEmits,onMounted} from "vue"
-
+import { useRouter } from "vue-router"
+  
    onMounted(() =>{
         getUsers()   
    })
+
+   const router = useRouter()
     
     const props = defineProps(["currentUser"])
     const emits = defineEmits(["selectConvo"])
@@ -48,11 +55,11 @@ import {reactive, defineProps, defineEmits,onMounted} from "vue"
 
     const logout = () =>{
         localStorage.removeItem("userData")
-        this.$router.push({name: 'login'})
+        router.push({name: 'login'})
     }  
     
-    const selectConvo = (id, username) =>{
-        emits('setCurrentConversation', id, username)
+    const selectConvo = (id, username, profilePicture) =>{
+        emits('setCurrentConversation', id, username, profilePicture)
     }
 
     const getConversations = () => {

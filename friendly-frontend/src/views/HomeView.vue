@@ -7,8 +7,9 @@
           <div class="chat-header px-10 py-4">
             <v-avatar size="x-large" color="surface-variant">
               <v-img
-                :src="currentConversation.chattingWith.profilePicture ? currentConversation.chattingWith.profilePicture : 
-                `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 20)}.jpg`"
+                :src="currentConversation.chattingWith.profilePicture 
+                ? currentConversation.chattingWith.profilePicture 
+                : 'noImage.png'"
               ></v-img>
             </v-avatar>
             <h1 class="pl-5 pt-1">{{currentConversation.chattingWith.username}}</h1>
