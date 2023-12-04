@@ -124,6 +124,7 @@
   }
 
   const setCurrentConversation = (receipientId, receipientUsername, profilePicture) => {
+    state.messages = []
     currentConversation.members = [receipientId, currentUser._id];
     currentConversation.chattingWith.username =  receipientUsername
     currentConversation.chattingWith.profilePicture =  profilePicture
