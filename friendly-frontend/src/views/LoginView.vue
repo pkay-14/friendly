@@ -1,6 +1,7 @@
 <template>
 <v-app>
-  <div class="login">
+  <div class="login" data-testid="login-page"
+>
     <v-col cols="12" md="6" class="login-wrapper" >
       <v-sheet rounded>
         <v-label class="pt-5">
@@ -19,6 +20,7 @@
               :rules="[rules.required]"
               class="mb-2"
               label="Email"
+              data-testid="email"
             ></v-text-field>
 
             <v-text-field
@@ -26,6 +28,7 @@
               :rules="[rules.required]"
               label="Password"
               type="password"
+              data-testid="password"
               placeholder="Enter your password"
             ></v-text-field>
             <br>
@@ -44,7 +47,7 @@
             <p class="py-2">
               Don't have an account?
               <span>
-                <router-link :to="{name: 'register'}">
+                <router-link :to="{name: 'register'}" data-testid="signup-btn">
                   Sign Up
                 </router-link>
               </span>

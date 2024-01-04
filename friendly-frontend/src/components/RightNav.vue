@@ -38,7 +38,7 @@
 </template>
 <script setup>
 import * as utils from "../lib/helperMethods"
-import {reactive, defineProps, defineEmits,onMounted} from "vue"
+import {reactive, defineProps, onMounted} from "vue"
 import { useRouter } from "vue-router"
   
    onMounted(() =>{

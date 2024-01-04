@@ -1,6 +1,6 @@
 <template>
 <v-app>
-  <div class="register">
+  <div class="register" data-testid="register-page">
     <v-col cols="12" md="6" class="register-wrapper" >
       <v-sheet rounded>
         <v-label class="pt-4">
