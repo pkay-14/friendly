@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="currentUser">
+  <v-card v-if="currentUser" data-testid="homeView">
     <v-layout class="layout">
       <RightNav :currentUser="currentUser" @setCurrentConversation="setCurrentConversation"/>
       <v-main class="main" style="height: 100vh">

@@ -1,11 +1,11 @@
-describe('The Login Page', () => {
-    it('navigates to Register page when signup btn clicked', function(){
+describe('The Login Page flow', () => {
+    it("checks 'signup' btn click", function(){
         cy.visit('/login')
         cy.get("[data-testid=signup-btn]").click()
-        cy.get("[data-testid=register-page]")
+        cy.get("[data-testid=register-page]").should('exist')
     })
     
-    it('set current user when logged in', function(){
+    it('checks userData and redirection to HomeView when logged in', function(){
         cy.visit('/login')
         cy.fixture('user')
         .then((user)=>{
@@ -15,6 +15,8 @@ describe('The Login Page', () => {
             cy.get('[data-testid=password]').type(`${password}{enter}`)
         }).should(()=>{
             expect(localStorage.getItem("userData")).contains("username")
+        }).then(()=>{
+            expect(cy.get('[data-testid=homeView]').should('exist'))
         })
     })
   })
