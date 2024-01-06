@@ -20,6 +20,7 @@
               :rules="[formRules.required, formRules.email]"
               class="mb-2"
               label="Email"
+              data-testid=email
             ></v-text-field>
 
             <v-text-field
@@ -27,6 +28,7 @@
               :rules="[formRules.required, formRules.minimum3]"
               class="mb-2"
               label="Username"
+              data-testid=username
             ></v-text-field>
 
             <v-text-field
@@ -35,6 +37,7 @@
               label="Password"
               type="password"
               placeholder="Set your password"
+              data-testid=password
             ></v-text-field>
 
             <v-text-field
@@ -43,6 +46,7 @@
               label="Confirm Password"
               type="password"
               placeholder="Enter your password again"
+              data-testid=passwordConfirm
             ></v-text-field>
             <br>
             <v-btn
@@ -59,7 +63,7 @@
             <p class="py-2">
               Already have an account?
               <span>
-                <router-link :to="{name: 'login'}">
+                <router-link :to="{name: 'login'}" data-testid="login-btn">
                   Login
                 </router-link>
               </span>
@@ -117,8 +121,15 @@
             utils.isLoggedIn() ? router.push({name: 'home'}) : alert('Signup failed')
           })
           .catch((err)=>{
+            let message = err.message
             console.log(err)
-            toast.error(err.message)
+            if(err.response.status == 409){
+              const duplicated = err.response.data
+              message = duplicated == "email" ? 
+              "user with this email already exists" : 
+              "username has already been taken"
+            }
+            toast.error(message)
           })
           }
           else{

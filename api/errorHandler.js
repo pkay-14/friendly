@@ -1,7 +1,12 @@
-function errorHandler (err, req, res) {
- message = `Server Error: ${err.message}`
- console.log(`res: ${err}`)
- res.status(err.statusCode || 500).send(message)
+const ErrorHandler = (err, req, res, next) => {
+ let message = `Server Error: ${err.message}`
+ let errCode = 500
+ if(err.code === 11000){
+   duplicatedField = Object.keys(err.keyValue)[0]
+   errCode = 409
+   message = duplicatedField
+ }
+ res.status(errCode).send(message)
 }
 
-module.exports = {errorHandler}
+module.exports = {ErrorHandler}

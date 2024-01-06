@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 const authRoute = require("./routes/auth")
 const conversationRoute = require("./routes/conversations")
 const UserRoute = require("./routes/users")
-const { errorHandler } = require('./errorHandler');
+const { ErrorHandler } = require('./errorHandler');
 const cors = require('cors');
 var bodyParser = require("body-parser");
 dotenv.config();
@@ -36,7 +36,7 @@ app.use("/api/auth", authRoute)
 app.use("/api/conversations", conversationRoute)
 app.use("/api/users", UserRoute)
 
-app.use(errorHandler)
+app.use(ErrorHandler)
 
 app.listen(process.env.SERVER_PORT, ()=>{
     console.log(`Server running on port: ${process.env.SERVER_PORT}`)
