@@ -1,4 +1,10 @@
 describe('The Signup Page flow', () => {
+    before(() => {
+
+        cy.request('DELETE','http://localhost:3000/api/users')
+      
+      })
+
     it("checks 'login' btn click", function(){
         cy.visit('/register')
         cy.get("[data-testid=login-btn]")
@@ -14,7 +20,7 @@ describe('The Signup Page flow', () => {
         cy.visit('/register')
         cy.fixture('users')
         .then((users)=>{
-            const user = users.newUsers[0]
+            const user = users.testUsers[0]
             const {email, username, password} = user
             cy.get('[data-testid=email]').type(email)
             cy.get('[data-testid=username]').type(username)

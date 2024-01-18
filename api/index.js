@@ -21,11 +21,12 @@ const corsOptions = {
 }
 app.use(cors(corsOptions));
 
-
-
 app.use(express.json())
+const db = process.env.NODE_ENV == 'test' 
+? process.env.DATABASE_URL_TEST 
+: process.env.DATABASE_URL
 
-mongoose.connect(process.env.DATABASE_URL)
+mongoose.connect(db)
 .then(()=>{console.log("mongodb: Connection to database successful!")})
 .catch((err)=>{
     console.log("mongodb: Failed to connect to database")
@@ -40,4 +41,5 @@ app.use(ErrorHandler)
 
 app.listen(process.env.SERVER_PORT, ()=>{
     console.log(`Server running on port: ${process.env.SERVER_PORT}`)
+    console.log(`Server Instance: ${process.env.NODE_ENV}`)
 })

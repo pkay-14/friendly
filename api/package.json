@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "nodemon --inspect index.js"
+    "dev": "NODE_ENV=development nodemon --inspect index.js",
+    "test": "NODE_ENV=test nodemon --inspect index.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
