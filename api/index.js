@@ -10,7 +10,7 @@ const { ErrorHandler } = require('./errorHandler');
 const cors = require('cors');
 var bodyParser = require("body-parser");
 dotenv.config();
-
+var ws = require('./routes/websocket-server');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -25,13 +25,15 @@ app.use(express.json())
 const db = process.env.NODE_ENV == 'test' 
 ? process.env.DATABASE_URL_TEST 
 : process.env.DATABASE_URL
-
 mongoose.connect(db)
 .then(()=>{console.log("mongodb: Connection to database successful!")})
 .catch((err)=>{
     console.log("mongodb: Failed to connect to database")
     console.log(err)
 })
+app.get('/', (req, res) => {
+    res.send('Server is up and runing!!')
+  })
 
 app.use("/api/auth", authRoute)
 app.use("/api/conversations", conversationRoute)
@@ -43,3 +45,4 @@ app.listen(process.env.SERVER_PORT, ()=>{
     console.log(`Server running on port: ${process.env.SERVER_PORT}`)
     console.log(`Server Instance: ${process.env.NODE_ENV}`)
 })
+ws.websocketServer(process.env.SERVER_URL)

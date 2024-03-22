@@ -48,13 +48,14 @@ import { useRouter } from "vue-router"
    const router = useRouter()
     
     const props = defineProps(["currentUser"])
-    const emits = defineEmits(["selectConvo"])
+    const emits = defineEmits(["selectConvo", "logout"])
 
     const conversations =  reactive([])
     const userAccounts = reactive([])
 
     const logout = () =>{
         localStorage.removeItem("userData")
+        emits('logout')
         router.push({name: 'login'})
     }  
     

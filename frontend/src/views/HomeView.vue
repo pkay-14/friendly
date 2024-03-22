@@ -1,7 +1,9 @@
 <template>
   <v-card v-if="currentUser" data-testid="homeView">
     <v-layout class="layout">
-      <RightNav :currentUser="currentUser" @setCurrentConversation="setCurrentConversation"/>
+      <RightNav :currentUser="currentUser" 
+      @setCurrentConversation="setCurrentConversation"
+      @logout="logout"/>
       <v-main class="main" style="height: 100vh">
         <div v-if="currentConversation.chattingWith.username.length != 0">
           <div class="chat-header px-10 py-4">
@@ -59,7 +61,7 @@
           </div>
         </div>
         <div class="center-screen">
-          <h1>Select a user to chat with</h1>
+          <!-- <h1>Select a user to chat with</h1> -->
         </div>
       </v-main>
     </v-layout>
@@ -151,6 +153,10 @@
       });
       appendChat(message)
       textValue = "";
+  }
+  
+  const logout = ()=> {
+    //TODO: emit logout to websocket
   }
   
   const appendChat = (incomingMessage) => {

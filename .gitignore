@@ -6,8 +6,8 @@ api/node_modules
 
 
 # local env files
-friendly-fronted/.env.development
-api/.env.development
+fronted/.env.development
+api/.env
 /.env
 .env.local
 .env.*.local

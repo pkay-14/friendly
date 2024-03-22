@@ -1,0 +1,38 @@
+version: '3'
+services:
+  web:
+    build: ./frontend
+    container_name: fiendly-web
+    command: vue serve
+    volumes:
+      - ./:/frontend
+    ports:
+      - 8080:8080
+    command: npm run serve
+    depends_on:
+      - api
+      - mongodb
+
+  api:
+    build: './api'
+    container_name: fiendly-api
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/api
+    command: npm run dev
+    depends_on:
+      - mongo
+  
+  mongodb:
+    image: mongo
+    restart: unless-stopped
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    command: mongod --port 27017 --bind_ip_all
+    volumes:
+      - db:/data/db
+
+volumes:
+  db:
