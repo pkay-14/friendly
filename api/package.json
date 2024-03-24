@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "dev": "NODE_ENV=development nodemon index.js",
-    "test": "NODE_ENV=test nodemon --inspect index.js"
+    "dev": "NODE_ENV=development nodemon --inspect index.js",
+    "test": "NODE_ENV=test nodemon index.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -12,7 +12,6 @@
     "mongoose": "8.0.1",
     "nodemon": "^3.0.1",
     "socket.io": "^4.7.2"
-
   },
   "name": "api",
   "version": "1.0.0",
